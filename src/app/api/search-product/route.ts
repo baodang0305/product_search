@@ -1,19 +1,27 @@
 import { extractPhraseKey, googleLenHandler } from './util/index'
 import { htmlParser } from './util/parser'
+import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const imgUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkWmM5BudiltGBlHXjejHh4WdJJVlBd1WQ2g&usqp=CAU'
-    const html = await googleLenHandler(imgUrl)
-    const rawText = htmlParser(html as any)
-    const phraseKey: any = await extractPhraseKey(rawText)
-    return new Response(phraseKey, {
-      status: 200,
-    })
+    const { searchParams } = new URL(request.url)
+    const imgUrl = searchParams.get('imgUrl') || ''
+    const lang = searchParams.get('lang') || 'ja'
+
+    if (!imgUrl) {
+      return new Response("Error", {
+        status: 500,
+      })
+    }
+    const html = await googleLenHandler(imgUrl, lang)
+    const rawText = htmlParser(html as string, lang)
+    if (!rawText) {
+      return NextResponse.json({ error: 'Not found.' }, { status: 500 })
+    }
+    const phraseKey: any = await extractPhraseKey(rawText.replace(/[`|(|)|"|']/g, ''))
+    return NextResponse.json({ data: phraseKey }, { status: 200 })
   } catch (error) {
     console.log(error)
-    return new Response("Error", {
-      status: 500,
-    })
+    return NextResponse.json({ error: "Extract phrase key failed." }, { status: 500 })
   }
 }

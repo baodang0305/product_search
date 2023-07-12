@@ -1,10 +1,10 @@
 import * as cheerio from 'cheerio'
 
-export const htmlParser = (html: string) => {
+export const htmlParser = (html: string, lang: string) => {
   const newHtml = `<html><body>${html}</body></html>`
   const $ = cheerio.load(newHtml);
+  const text = $('c-wiz')?.text() || $.text() || ''
+  
+  return text
 
-  const visualMatchesEl = $('div')?.filter((i, el: any) => $(el)?.text() === 'Visual matches')
-  const visualMatchesBodyEl = visualMatchesEl?.next()
-  return $(visualMatchesBodyEl)?.text() || ''
 };

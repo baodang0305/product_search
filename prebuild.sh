@@ -11,7 +11,8 @@ pip install -U pip setuptools wheel
 pip install -U spacy
 
 # Download spaCy model
-python3 -m spacy download en_core_web_sm
+# python3 -m spacy download en_core_web_lg
+python3 -m spacy download ja_core_news_lg
 
 # Download pytextrank
 python3 -m pip install pytextrank

@@ -2,14 +2,17 @@ const puppeteer = require('puppeteer');
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const handler = (imgUrl: string) => {
+const handler = (imgUrl: string, lang: string) => {
   return new Promise(async (resolve, reject) => {
     let browser;
     try {
-      browser = await puppeteer.launch();
+      browser = await puppeteer.launch({ 
+        headless:false,
+        args: ["--no-sandbox"] 
+      });
       const page = await browser.newPage();
   
-      await Promise.all([page.goto('https://www.google.com/?hl=en'), page.waitForNavigation()]);
+      await Promise.all([page.goto(`https://www.google.com/?hl=${lang}`), page.waitForNavigation()]);
   
       await Promise.all([page.click('*[data-upload-path*="upload"]')]);
       
@@ -28,11 +31,8 @@ const handler = (imgUrl: string) => {
       await input?.type(imgUrl);
     
       // click on the search button inside the second c-wiz element
-      console.time('search');
       const searchButton = await cWiz2.$('*[role="button"]');
       await Promise.all([searchButton?.click(), page.waitForNavigation()]);
-      console.timeEnd('search');
-  
   
       // wait for the root element to be present in the DOM
       await sleep(100);
